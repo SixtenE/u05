@@ -14,6 +14,7 @@
     "vite": "^6.0.5"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.0",
     "lucide-static": "^0.473.0",
     "nanoid": "^5.0.9",
     "sortablejs": "^1.15.6"

@@ -1,6 +1,7 @@
 import './style.css'
 import Sortable from 'sortablejs'
 import { nanoid } from 'nanoid'
+import { createClient } from '@supabase/supabase-js'
 
 interface Todo {
   id: string
@@ -9,7 +10,15 @@ interface Todo {
   createdAt: Date
 }
 
-console.log(nanoid())
+const supabaseUrl = 'https://nbodsrunndqzztsvilcc.supabase.co'
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+const { data: mama, error } = await supabase.from('todos').select('*')
+
+if (!error) {
+  console.log(mama)
+}
 
 const todos: Todo[] = [
   {
