@@ -3,7 +3,6 @@ import Sortable from 'sortablejs'
 import { nanoid } from 'nanoid'
 import { createClient } from '@supabase/supabase-js'
 import { stagger, animate } from 'motion'
-import { u } from 'motion/react-client'
 
 interface Todo {
   id: string
@@ -16,7 +15,22 @@ const supabaseUrl = 'https://nbodsrunndqzztsvilcc.supabase.co'
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-const URLPath = new URL(window.location.href).pathname
+async function logIn() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'sixten@chas.at',
+    password: 'nndqzzts',
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  console.log(data.user)
+}
+
+logIn()
+
+//const URLPath = new URL(window.location.href).pathname
 
 async function fetchTodos() {
   const { data: todos, error } = await supabase.from('todos').select('*')
@@ -26,7 +40,6 @@ async function fetchTodos() {
     throw new Error(error.message)
   }
 
-  console.log(todos)
   renderTodos(todos)
 }
 
@@ -79,14 +92,13 @@ function renderTodos(todos: Todo[]) {
     { delay: stagger(0.05), duration: 0.1, ease: 'easeIn' },
   )
 
-  const form = document
+  document
     .querySelector<HTMLFormElement>('.add-todo')
     ?.addEventListener('submit', async (e) => {
       e.preventDefault()
 
       const formData = new FormData(e.target as HTMLFormElement)
 
-      console.log(formData.get('text'))
       const text = formData.get('text') as string
 
       if (text.trim() === '') return
