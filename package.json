@@ -2,14 +2,18 @@
   "name": "u05",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://sixtene.github.io/u05/",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "pnpm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@types/sortablejs": "^1.15.8",
+    "gh-pages": "^6.3.0",
     "typescript": "~5.6.2",
     "vite": "^6.0.5"
   },
