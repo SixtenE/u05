@@ -1,0 +1,145 @@
+@import '/node_modules/lucide-static/font/lucide.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+  --background: #fafafa;
+  --foreground: #ffffff;
+  --text: #0a0a0a;
+  --border: #e5e5e5;
+  --brand: #0284c7;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+
+  background: var(--background);
+
+  font-family: 'Inter', sans-serif;
+}
+
+.container {
+  width: 100%;
+
+  margin: 0 auto;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+header {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  & > h1 {
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: -0.3rem;
+    color: var(--text);
+    font-family: 'Times New Roman', Times, serif;
+  }
+}
+
+.todos {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  list-style-type: none;
+}
+
+.todo {
+  width: 100%;
+
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  padding: 1rem 3rem 1rem 1rem;
+
+  background-color: var(--foreground);
+  border-radius: 0.7rem;
+  border: 1px solid var(--border);
+  color: var(--text);
+
+  & .todo-icon {
+    position: absolute;
+    right: 1rem;
+
+    cursor: grab;
+  }
+
+  & .text {
+    font-size: 1rem;
+  }
+}
+
+.add-todo {
+  width: 100%;
+
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 0 18rem 8rem 18rem;
+}
+
+.add-todo textarea {
+  width: 100%;
+  height: 7rem;
+
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  outline: none;
+  resize: none;
+
+  border: 2px solid var(--border);
+  background-color: var(--border);
+  font-size: 0.8rem;
+  color: var(--text);
+
+  &::placeholder {
+    color: var(--text);
+    font-size: 0.8rem;
+  }
+  &:focus {
+    border: 2px solid var(--brand);
+  }
+}
+
+@media (min-width: 640px) {
+  .container {
+    width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    width: 1024px;
+  }
+}
+/*
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #1a1a1a;
+    --text: #fafafa;
+    --border: #2a2a2a;
+    --brand: #0284c7;
+  }
+}
+*/
