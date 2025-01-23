@@ -1,32 +1,54 @@
 import './style.css'
 import Sortable from 'sortablejs'
 import { nanoid } from 'nanoid'
+import { createClient } from '@supabase/supabase-js'
+import { stagger, animate } from 'motion'
 
 interface Todo {
   id: string
   text: string
   completed: boolean
-  createdAt: Date
+  created_at: Date
 }
 
-console.log(nanoid())
+const supabaseUrl = 'https://nbodsrunndqzztsvilcc.supabase.co'
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-const todos: Todo[] = [
-  {
-    id: nanoid(),
-    text: 'lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.',
-    completed: false,
-    createdAt: new Date(),
-  },
-  {
-    id: nanoid(),
-    text: 'lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.',
-    completed: true,
-    createdAt: new Date(),
-  },
-]
+async function logIn() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'sixten@chas.at',
+    password: 'nndqzzts',
+  })
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  console.log(data.user)
+}
+
+logIn()
+
+//const URLPath = new URL(window.location.href).pathname
+
+async function fetchTodos() {
+  const { data: todos, error } = await supabase.from('todos').select('*')
+  //.eq('id', URLPath.substring(1))
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  renderTodos(todos)
+}
+
+fetchTodos()
+
+function renderTodos(todos: Todo[]) {
+  if (todos.length === 0) return
+
+  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <main class="container">
         <header>
             <h1>Todos</h1>
@@ -53,12 +75,47 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
         <form class="add-todo">
             <textarea name="text" placeholder="What needs to be done?"></textarea>
+            <button type="submit">Add Todo</button>
         </form>
     </main>
-`
+    `
 
-const el = document.querySelector<HTMLUListElement>('.todos')!
-Sortable.create(el, {
-  animation: 300,
-  handle: '.icon-grip-vertical',
-})
+  const el = document.querySelector<HTMLUListElement>('.todos')!
+  Sortable.create(el, {
+    animation: 300,
+    handle: '.icon-grip-vertical',
+  })
+
+  animate(
+    '.todos li',
+    { scale: [0.9, 1], y: [10, 0], opacity: [0, 1] },
+    { delay: stagger(0.05), duration: 0.1, ease: 'easeIn' },
+  )
+
+  document
+    .querySelector<HTMLFormElement>('.add-todo')
+    ?.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const formData = new FormData(e.target as HTMLFormElement)
+
+      const text = formData.get('text') as string
+
+      if (text.trim() === '') return
+
+      const todo: Todo = {
+        id: nanoid(),
+        text,
+        completed: false,
+        created_at: new Date(),
+      }
+
+      const { error } = await supabase.from('todos').insert([todo])
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      fetchTodos()
+    })
+}
