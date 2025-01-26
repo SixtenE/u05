@@ -1,19 +1,20 @@
 import './style.css'
 import Sortable from 'sortablejs'
 import { nanoid } from 'nanoid'
-import { createClient } from '@supabase/supabase-js'
-import { stagger, animate } from 'motion'
+import type { User } from '@supabase/supabase-js'
+import { animate } from 'motion'
+import { supabase } from './lib/initSupabase'
 
 interface Todo {
   id: string
   text: string
   completed: boolean
   created_at: Date
+  user_id: string
 }
 
-const supabaseUrl = 'https://nbodsrunndqzztsvilcc.supabase.co'
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+let todos: Todo[] = []
+let user: User | null = null
 
 async function logIn() {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -25,97 +26,151 @@ async function logIn() {
     throw new Error(error.message)
   }
 
-  console.log(data.user)
+  user = data.user
+
+  console.log(data)
+
+  document.querySelector<HTMLButtonElement>(
+    'header button.sign-in',
+  )!.style.visibility = 'hidden'
+
+  document.querySelector<HTMLButtonElement>(
+    'header button.sign-out',
+  )!.style.visibility = 'visible'
+
+  fetchTodos()
 }
 
-logIn()
+async function deleteAllTodos() {
+  const { error } = await supabase
+    .from('todos')
+    .delete()
+    .eq('user_id', user!.id)
 
-//const URLPath = new URL(window.location.href).pathname
+  if (error) {
+    throw new Error(error.message)
+  }
+}
 
 async function fetchTodos() {
-  const { data: todos, error } = await supabase.from('todos').select('*')
-  //.eq('id', URLPath.substring(1))
+  const { data, error } = await supabase
+    .from('todos')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .eq('user_id', user!.id)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  renderTodos(todos)
+  todos = data
+
+  renderTodos()
 }
 
-fetchTodos()
-
-function renderTodos(todos: Todo[]) {
-  if (todos.length === 0) return
-
-  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-    <main class="container">
-        <header>
-            <h1>Todos</h1>
-        </header>
-        <ul class="todos">
-        ${todos
-          .map(
-            (todo) => `
-            <li class="todo">
-                ${
-                  todo.completed
-                    ? `<div class="icon-circle-check"></div>`
-                    : `<div class="icon-circle"></div>`
-                }
-                <p class="text">
-                    ${todo.text}
-                </p>
-                <div class="icon-grip-vertical todo-icon"></div>
-            </li>
-        `,
-          )
-          .join('')}
-        </ul>
-
-        <form class="add-todo">
-            <textarea name="text" placeholder="What needs to be done?"></textarea>
-            <button type="submit">Add Todo</button>
-        </form>
-    </main>
+function todoComponent(todo: Todo) {
+  return `
+        <li class="todo">
+            ${
+              todo.completed
+                ? `<div class="icon-circle-check"></div>`
+                : `<div class="icon-circle"></div>`
+            }
+            <p class="text">${todo.text}</p>
+            <div class="icon-grip-vertical todo-icon"/>
+        </li>
     `
+}
+
+function renderTodos() {
+  const todosHTML = todos.map(todoComponent).reverse().join('')
+
+  document.querySelector<HTMLUListElement>('.todos')!.innerHTML = todosHTML
 
   const el = document.querySelector<HTMLUListElement>('.todos')!
   Sortable.create(el, {
     animation: 300,
     handle: '.icon-grip-vertical',
+    group: 'todos-order',
+    store: {
+      get: () => {
+        const order = localStorage.getItem('todos-order')
+        return order ? order.split('|') : []
+      },
+      set: (sortable) => {
+        const order = sortable.toArray()
+        localStorage.setItem('todos-order', order.join('|'))
+      },
+    },
   })
+}
+
+async function addTodo() {
+  if (!user) return
+
+  const textareaValue =
+    document.querySelector<HTMLTextAreaElement>('.add-todo textarea')!.value
+
+  if (textareaValue.trim() === '') return
+
+  const todo: Todo = {
+    id: nanoid(),
+    text: textareaValue,
+    completed: false,
+    created_at: new Date(),
+    user_id: user.id,
+  }
+
+  const { error } = await supabase.from('todos').insert([todo])
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  todos.push(todo)
+
+  document.querySelector<HTMLTextAreaElement>('.add-todo textarea')!.value = ''
+
+  renderTodos()
 
   animate(
-    '.todos li',
-    { scale: [0.9, 1], y: [10, 0], opacity: [0, 1] },
-    { delay: stagger(0.05), duration: 0.1, ease: 'easeIn' },
+    '.todo:first-of-type',
+    { scale: [0.9, 1], opacity: [0, 1] },
+    { ease: 'circInOut', duration: 0.3 },
   )
-
-  document
-    .querySelector<HTMLFormElement>('.add-todo')
-    ?.addEventListener('submit', async (e) => {
-      e.preventDefault()
-
-      const formData = new FormData(e.target as HTMLFormElement)
-
-      const text = formData.get('text') as string
-
-      if (text.trim() === '') return
-
-      const todo: Todo = {
-        id: nanoid(),
-        text,
-        completed: false,
-        created_at: new Date(),
-      }
-
-      const { error } = await supabase.from('todos').insert([todo])
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      fetchTodos()
-    })
 }
+
+document
+  .querySelector<HTMLTextAreaElement>('.add-todo textarea')
+  ?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addTodo()
+    }
+  })
+
+document
+  .querySelector<HTMLButtonElement>('.add-todo button')
+  ?.addEventListener('click', addTodo)
+
+document
+  .querySelector<HTMLHeadingElement>('header h1')
+  ?.addEventListener('click', async () => {
+    await deleteAllTodos()
+    document.querySelector<HTMLUListElement>('.todos')!.innerHTML = ''
+  })
+
+document
+  .querySelector<HTMLButtonElement>('.sign-in')
+  ?.addEventListener('click', async () => {
+    console.log('sign-in')
+    await logIn()
+  })
+
+document
+  .querySelector<HTMLButtonElement>('header button.sign-out')
+  ?.addEventListener('click', async () => {
+    await supabase.auth.signOut()
+  })
+
+console.log(await supabase.auth.getUser())
