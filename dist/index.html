@@ -11,55 +11,74 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1"
     />
-    <meta name="theme-color" content="#1a1a1a" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="
+    (prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#1a1a1a"
+      media="
+    (prefers-color-scheme: dark)"
+    />
+
     <title>u05 - Todos</title>
-    <script type="module" crossorigin src="/u05/assets/index-ChIEFtMd.js"></script>
-    <link rel="stylesheet" crossorigin href="/u05/assets/index-9d559ceN.css">
+    <script type="module" crossorigin src="/u05/assets/index-CRFxoSoJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/u05/assets/index-C0VThG_V.css">
   </head>
   <body>
     <main class="container">
-      <header>
+      <header class="header">
         <div class="header-wrapper">
-          <div>
-            <h1>Todos</h1>
-          </div>
-          <div>
-            <button class="sign-out">
-              <p>Sign out</p>
-              <div class="icon-log-out"></div>
-            </button>
-          </div>
+          <a href="/u05/" class="header-logo">Todos</a>
+          <button class="sign-out-button">
+            Sign out
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-log-out"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" x2="9" y1="12" y2="12" />
+            </svg>
+          </button>
         </div>
       </header>
 
-      <ul class="todos">
-        <!-- <div class="icon-loader-circle loader-icon"></div> -->
-      </ul>
+      <ul class="todos"></ul>
 
-      <div class="login-form">
-        <form>
-          <input
-            type="text"
-            name="email"
-            placeholder="Email"
-            autocomplete="off"
-            autofocus
-          />
-          <input type="password" name="password" placeholder="Password" />
-          <button class="login-button">
-            Sign in
-            <div class="icon-chevron-right"></div>
-            <!-- <div class="icon-loader-circle loader-icon"></div> -->
+      <div class="add-todo-wrapper">
+        <form class="add-todo-form">
+          <textarea name="text" placeholder="What needs to be done?"></textarea>
+          <button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-corner-down-left"
+            >
+              <polyline points="9 10 4 15 9 20" />
+              <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+            </svg>
           </button>
         </form>
       </div>
-
-      <!-- <div class="add-todo">
-        <textarea name="text" placeholder="What needs to be done?"></textarea>
-        <button>
-          <div class="icon-corner-down-left"></div>
-        </button>
-      </div> -->
     </main>
   </body>
 </html>

@@ -1,196 +1,105 @@
+import { nanoid } from 'nanoid'
+import { createTodo, getUser, readTodos, signOut, Todo } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from './lib/supabase'
 
-/*
-    TYPES
-*/
-/* 
-interface Todo {
-  id: string
-  user_id: User['id']
-  text: string
-  completed: boolean
-  created_at: string
-} */
-
-/*
-    VARIABLES
-*/
-
-let user: User | null = null
-
-/* 
-    DOM ELEMENTS
-*/
-
-//AUTH SWITCH
-const toggleAuthLinks = document.querySelectorAll(
-  '.auth-footer p',
-) as NodeListOf<HTMLParagraphElement>
-
-//AUTH ERROR MESSAGE
-const authErrorMessage = document.querySelector(
-  '.error-message',
-) as HTMLParagraphElement
-
-//AUTH CONTAINER
-const authContainer = document.querySelector(
-  '.auth-container',
-) as HTMLDivElement
-
-//SIGN IN FORM
-const signInForm = document.querySelector('.sign-in-form') as HTMLFormElement
-
-//SIGN UP FORM
-const signUpForm = document.querySelector('.sign-up-form') as HTMLFormElement
-
-//SIGN OUT BUTTON
+const todosList = document.querySelector('.todos') as HTMLUListElement
 const signOutButton = document.querySelector(
   '.sign-out-button',
 ) as HTMLButtonElement
+const addTodoForm = document.querySelector('.add-todo-form') as HTMLFormElement
+const textArea = document.querySelector(
+  '.add-todo-form textarea',
+) as HTMLTextAreaElement
 
-//TODOS LIST
-const todosList = document.querySelector('.todos') as HTMLUListElement
+let user: User | null = null
 
-/*
-    FUNCTIONS
-*/
-
-function showElement(element: HTMLElement) {
-  element.style.display = 'flex'
+function addTodoItem(todo: Todo) {
+  const todoItem = document.createElement('li')
+  todoItem.classList.add('todo')
+  todoItem.textContent = todo.text
+  todosList.appendChild(todoItem)
 }
 
-function hideElement(element: HTMLElement) {
-  element.style.display = 'none'
-}
+async function fetchTodos() {
+  const { data: todos, error: todosError } = await readTodos()
 
-function handleLogin() {
-  hideElement(authContainer)
-
-  showElement(signOutButton)
-
-  showElement(todosList)
-}
-
-async function renderTodos() {}
-
-/* async function checkActiveSession() {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession()
-
-  if (error || !session) {
-    return
+  if (todosError) {
+    console.error(todosError)
   }
 
-  user = session.user
-
-  renderTodos()
-
-  console.log('Active session:', user)
-} */
-
-/* supabase.auth.signInWithPassword({
-  email: 'sixten@chas.at',
-  password: 'nndqzzts',
-}) */
-
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (!session) return
-
-  if (event === 'SIGNED_IN') {
-    console.log(session.user.email)
-    handleLogin()
-  } else if (event === 'SIGNED_OUT') {
-    console.log('User signed out')
-  } else return
-})
-
-/*
-    EVENT LISTENERS
-*/
-
-//SHOW AND HIDE SIGN IN AND SIGN UP FORMS
-toggleAuthLinks.forEach((link) => {
-  link.addEventListener('click', () => {
-    signInForm.style.display =
-      signInForm.style.display === 'none' ? 'flex' : 'none'
-    signUpForm.style.display =
-      signInForm.style.display === 'none' ? 'flex' : 'none'
+  todos?.forEach((todo) => {
+    addTodoItem(todo)
   })
-})
+}
 
-//SIGN OUT BUTTON
+async function checkUser() {
+  const { data, error } = await getUser()
+
+  if (error || !data) {
+    window.location.href = '/u05/sign-in'
+  }
+
+  user = data.user
+
+  fetchTodos()
+}
+
 signOutButton.addEventListener('click', async () => {
-  const { error } = await supabase.auth.signOut()
-
-  hideElement(todosList)
-  showElement(authContainer)
-  hideElement(signOutButton)
-})
-
-window.logout = async () => {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await signOut()
   if (error) {
     console.error(error)
     return
   }
-  console.log('User signed out')
-}
+  window.location.href = '/u05/sign-in'
+})
 
-//SIGN IN FORM
-signInForm.addEventListener('submit', async (event) => {
-  event.preventDefault()
+addTodoForm.addEventListener('submit', async (e) => {
+  e.preventDefault()
 
-  const formData = new FormData(signInForm)
-
-  const email = formData.get('email')
-  const password = formData.get('password')
-
-  if (
-    !email ||
-    typeof email !== 'string' ||
-    !password ||
-    typeof password !== 'string'
-  ) {
-    authErrorMessage.classList.remove('hidden')
+  if (!user) {
     return
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
-  })
+  const form = e.target as HTMLFormElement
+
+  const formData = new FormData(form)
+
+  const text = formData.get('text') as string
+
+  console.log(text)
+
+  if (!text || text.trim() === '') {
+    console.error('Text is required')
+    return
+  }
+
+  const newTodo: Todo = {
+    id: nanoid(),
+    completed: false,
+    text,
+    created_at: new Date(),
+    user_id: user.id,
+  }
+
+  const { error } = await createTodo({ todo: newTodo })
 
   if (error) {
-    authErrorMessage.style.display = 'flex'
-    authErrorMessage.textContent = 'Invalid email or password'
-  }
-  return
-})
-
-//SIGN UP FORM
-signUpForm.addEventListener('submit', async (event) => {
-  event.preventDefault()
-
-  const formData = new FormData(signUpForm)
-
-  const email = formData.get('email')
-  const password = formData.get('password')
-  const confirmPassword = formData.get('confirm-password')
-
-  if (!email || !password || !confirmPassword) {
+    console.error(error)
     return
   }
 
-  if (password !== confirmPassword) {
-    return
+  addTodoItem(newTodo)
+
+  form.reset()
+})
+
+textArea.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    const form = document.querySelector('.add-todo-form') as HTMLFormElement
+
+    form.requestSubmit()
   }
-
-  console.log(email, password, confirmPassword)
 })
 
-document.addEventListener('DOMContentLoaded', () => {
-  hideElement(signUpForm)
-})
+checkUser()

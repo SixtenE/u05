@@ -12,18 +12,25 @@ document.querySelector('form')?.addEventListener('submit', async (e) => {
   const email = emailInput.value
   const password = passwordInput.value
 
-  const { data, error } = await signIn(email, password)
-  // Redirect or handle successful sign-in
+  if (!email || email.trim() === '' || !password || password.trim() === '') {
+    console.error('Email and password are required')
+    return
+  }
+
+  const { user, error } = await signIn({
+    email,
+    password,
+  })
 
   if (error) {
     console.error(error)
     return
   }
 
-  if (!data.user) {
+  if (!user) {
     console.error('No user found')
     return
   }
 
-  console.log(data.user.id)
+  window.location.href = '/u05/'
 })

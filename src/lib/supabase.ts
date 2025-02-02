@@ -1,17 +1,16 @@
 import {
-  AuthError,
+  type AuthError,
   createClient,
-  PostgrestError,
-  SupabaseClient,
-  User,
+  type PostgrestError,
+  type User,
 } from '@supabase/supabase-js'
 
-const supabase: SupabaseClient<any, 'public', any> = createClient(
+const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_KEY,
 )
 
-interface Todo {
+export interface Todo {
   id: string
   text: string
   user_id: User['id']
@@ -46,9 +45,6 @@ export async function signUp({
   const {
     data: { user },
     error,
-  }: {
-    data: { user: User | null }
-    error: AuthError | null
   } = await supabase.auth.signUp({
     email,
     password,
@@ -66,20 +62,14 @@ export async function getUser(): Promise<{
   data: { user: User | null }
   error: AuthError | null
 }> {
-  const {
-    data,
-    error,
-  }: { data: { user: User | null }; error: AuthError | null } =
-    await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser()
   return { data, error }
 }
 
 export async function createTodo({ todo }: { todo: Todo }): Promise<{
   error: PostgrestError | null
 }> {
-  const { error }: { error: PostgrestError | null } = await supabase
-    .from('todos')
-    .insert(todo)
+  const { error } = await supabase.from('todos').insert(todo)
   return { error }
 }
 
@@ -97,7 +87,7 @@ export async function readTodos(): Promise<{
 export async function updateTodo({ todo }: { todo: Todo }): Promise<{
   error: PostgrestError | null
 }> {
-  const { error }: { error: PostgrestError | null } = await supabase
+  const { error } = await supabase
     .from('todos')
     .update({
       text: todo.text,
@@ -111,10 +101,7 @@ export async function updateTodo({ todo }: { todo: Todo }): Promise<{
 export async function deleteTodo({ id }: { id: Todo['id'] }): Promise<{
   error: PostgrestError | null
 }> {
-  const { error }: { error: PostgrestError | null } = await supabase
-    .from('todos')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('todos').delete().eq('id', id)
 
   return { error }
 }
@@ -122,9 +109,7 @@ export async function deleteTodo({ id }: { id: Todo['id'] }): Promise<{
 export async function deleteAllTodos(): Promise<{
   error: PostgrestError | null
 }> {
-  const { error }: { error: PostgrestError | null } = await supabase
-    .from('todos')
-    .delete()
+  const { error } = await supabase.from('todos').delete()
 
   return { error }
 }
