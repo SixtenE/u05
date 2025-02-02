@@ -1,176 +1,196 @@
-import './style.css'
-import Sortable from 'sortablejs'
-import { nanoid } from 'nanoid'
 import type { User } from '@supabase/supabase-js'
-import { animate } from 'motion'
 import { supabase } from './lib/initSupabase'
 
+/*
+    TYPES
+*/
+/* 
 interface Todo {
   id: string
+  user_id: User['id']
   text: string
   completed: boolean
-  created_at: Date
-  user_id: string
-}
+  created_at: string
+} */
 
-let todos: Todo[] = []
+/*
+    VARIABLES
+*/
+
 let user: User | null = null
 
-async function logIn() {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: 'sixten@chas.at',
-    password: 'nndqzzts',
-  })
+/* 
+    DOM ELEMENTS
+*/
 
-  if (error) {
-    throw new Error(error.message)
-  }
+//AUTH SWITCH
+const toggleAuthLinks = document.querySelectorAll(
+  '.auth-footer p',
+) as NodeListOf<HTMLParagraphElement>
 
-  user = data.user
+//AUTH ERROR MESSAGE
+const authErrorMessage = document.querySelector(
+  '.error-message',
+) as HTMLParagraphElement
 
-  console.log(data)
+//AUTH CONTAINER
+const authContainer = document.querySelector(
+  '.auth-container',
+) as HTMLDivElement
 
-  document.querySelector<HTMLButtonElement>(
-    'header button.sign-in',
-  )!.style.visibility = 'hidden'
+//SIGN IN FORM
+const signInForm = document.querySelector('.sign-in-form') as HTMLFormElement
 
-  document.querySelector<HTMLButtonElement>(
-    'header button.sign-out',
-  )!.style.visibility = 'visible'
+//SIGN UP FORM
+const signUpForm = document.querySelector('.sign-up-form') as HTMLFormElement
 
-  fetchTodos()
+//SIGN OUT BUTTON
+const signOutButton = document.querySelector(
+  '.sign-out-button',
+) as HTMLButtonElement
+
+//TODOS LIST
+const todosList = document.querySelector('.todos') as HTMLUListElement
+
+/*
+    FUNCTIONS
+*/
+
+function showElement(element: HTMLElement) {
+  element.style.display = 'flex'
 }
 
-async function deleteAllTodos() {
-  const { error } = await supabase
-    .from('todos')
-    .delete()
-    .eq('user_id', user!.id)
-
-  if (error) {
-    throw new Error(error.message)
-  }
+function hideElement(element: HTMLElement) {
+  element.style.display = 'none'
 }
 
-async function fetchTodos() {
-  const { data, error } = await supabase
-    .from('todos')
-    .select('*')
-    .order('created_at', { ascending: true })
-    .eq('user_id', user!.id)
+function handleLogin() {
+  hideElement(authContainer)
 
-  if (error) {
-    throw new Error(error.message)
-  }
+  showElement(signOutButton)
 
-  todos = data
-
-  renderTodos()
+  showElement(todosList)
 }
 
-function todoComponent(todo: Todo) {
-  return `
-        <li class="todo">
-            ${
-              todo.completed
-                ? `<div class="icon-circle-check"></div>`
-                : `<div class="icon-circle"></div>`
-            }
-            <p class="text">${todo.text}</p>
-            <div class="icon-grip-vertical todo-icon"/>
-        </li>
-    `
-}
+async function renderTodos() {}
 
-function renderTodos() {
-  const todosHTML = todos.map(todoComponent).reverse().join('')
+/* async function checkActiveSession() {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession()
 
-  document.querySelector<HTMLUListElement>('.todos')!.innerHTML = todosHTML
-
-  const el = document.querySelector<HTMLUListElement>('.todos')!
-  Sortable.create(el, {
-    animation: 300,
-    handle: '.icon-grip-vertical',
-    group: 'todos-order',
-    store: {
-      get: () => {
-        const order = localStorage.getItem('todos-order')
-        return order ? order.split('|') : []
-      },
-      set: (sortable) => {
-        const order = sortable.toArray()
-        localStorage.setItem('todos-order', order.join('|'))
-      },
-    },
-  })
-}
-
-async function addTodo() {
-  if (!user) return
-
-  const textareaValue =
-    document.querySelector<HTMLTextAreaElement>('.add-todo textarea')!.value
-
-  if (textareaValue.trim() === '') return
-
-  const todo: Todo = {
-    id: nanoid(),
-    text: textareaValue,
-    completed: false,
-    created_at: new Date(),
-    user_id: user.id,
+  if (error || !session) {
+    return
   }
 
-  const { error } = await supabase.from('todos').insert([todo])
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  todos.push(todo)
-
-  document.querySelector<HTMLTextAreaElement>('.add-todo textarea')!.value = ''
+  user = session.user
 
   renderTodos()
 
-  animate(
-    '.todo:first-of-type',
-    { scale: [0.9, 1], opacity: [0, 1] },
-    { ease: 'circInOut', duration: 0.3 },
-  )
+  console.log('Active session:', user)
+} */
+
+/* supabase.auth.signInWithPassword({
+  email: 'sixten@chas.at',
+  password: 'nndqzzts',
+}) */
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (!session) return
+
+  if (event === 'SIGNED_IN') {
+    console.log(session.user.email)
+    handleLogin()
+  } else if (event === 'SIGNED_OUT') {
+    console.log('User signed out')
+  } else return
+})
+
+/*
+    EVENT LISTENERS
+*/
+
+//SHOW AND HIDE SIGN IN AND SIGN UP FORMS
+toggleAuthLinks.forEach((link) => {
+  link.addEventListener('click', () => {
+    signInForm.style.display =
+      signInForm.style.display === 'none' ? 'flex' : 'none'
+    signUpForm.style.display =
+      signInForm.style.display === 'none' ? 'flex' : 'none'
+  })
+})
+
+//SIGN OUT BUTTON
+signOutButton.addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut()
+
+  hideElement(todosList)
+  showElement(authContainer)
+  hideElement(signOutButton)
+})
+
+window.logout = async () => {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error(error)
+    return
+  }
+  console.log('User signed out')
 }
 
-document
-  .querySelector<HTMLTextAreaElement>('.add-todo textarea')
-  ?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      addTodo()
-    }
+//SIGN IN FORM
+signInForm.addEventListener('submit', async (event) => {
+  event.preventDefault()
+
+  const formData = new FormData(signInForm)
+
+  const email = formData.get('email')
+  const password = formData.get('password')
+
+  if (
+    !email ||
+    typeof email !== 'string' ||
+    !password ||
+    typeof password !== 'string'
+  ) {
+    authErrorMessage.classList.remove('hidden')
+    return
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
   })
 
-document
-  .querySelector<HTMLButtonElement>('.add-todo button')
-  ?.addEventListener('click', addTodo)
+  if (error) {
+    authErrorMessage.style.display = 'flex'
+    authErrorMessage.textContent = 'Invalid email or password'
+  }
+  return
+})
 
-document
-  .querySelector<HTMLHeadingElement>('header h1')
-  ?.addEventListener('click', async () => {
-    await deleteAllTodos()
-    document.querySelector<HTMLUListElement>('.todos')!.innerHTML = ''
-  })
+//SIGN UP FORM
+signUpForm.addEventListener('submit', async (event) => {
+  event.preventDefault()
 
-document
-  .querySelector<HTMLButtonElement>('.sign-in')
-  ?.addEventListener('click', async () => {
-    console.log('sign-in')
-    await logIn()
-  })
+  const formData = new FormData(signUpForm)
 
-document
-  .querySelector<HTMLButtonElement>('header button.sign-out')
-  ?.addEventListener('click', async () => {
-    await supabase.auth.signOut()
-  })
+  const email = formData.get('email')
+  const password = formData.get('password')
+  const confirmPassword = formData.get('confirm-password')
 
-console.log(await supabase.auth.getUser())
+  if (!email || !password || !confirmPassword) {
+    return
+  }
+
+  if (password !== confirmPassword) {
+    return
+  }
+
+  console.log(email, password, confirmPassword)
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+  hideElement(signUpForm)
+})

@@ -5,8 +5,8 @@
   --background: #fafafa;
   --foreground: #ffffff;
   --text: #0a0a0a;
+  --error: #f87171;
   --border: #e5e5e5;
-  --brand: #0284c7;
 }
 
 * {
@@ -34,71 +34,49 @@ body {
   gap: 1rem;
 }
 
-header {
+.header {
   width: 100%;
 
-  display: flex;
-  justify-content: space-between;
   position: fixed;
   z-index: 999;
   top: 0;
   left: 0;
-  padding: 0.5rem 12rem;
 
   background-color: var(--foreground);
   border-bottom: 1px solid var(--border);
-
-  & h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--text);
-    font-family: 'Times New Roman', Times, serif;
-  }
 }
 
-.button-group {
+.header-logo {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Times New Roman', Times, serif;
+  text-decoration: none;
+}
+
+.header-wrapper {
+  width: 100%;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  padding: 0 1rem;
+  margin: 0 auto;
 }
 
-header button {
-  width: fit-content;
-  height: fit-content;
+.sign-out-button {
+  width: 6rem;
+  height: 2rem;
 
-  padding: 0.5rem 1rem;
-
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   border: 2px solid transparent;
   border-radius: 9999px;
   outline: none;
-  font-weight: 500;
-
-  transition: border 0.2s ease-in-out;
-}
-
-button.sign-in {
-  visibility: visible;
-
   background-color: var(--text);
   color: var(--background);
-
-  &:hover,
-  &:focus {
-    border: 2px solid var(--brand);
-  }
-}
-
-button.sign-out {
-  visibility: hidden;
-
-  background-color: var(--foreground);
-  color: var(--text);
-
-  &:hover,
-  &:focus {
-    border: 2px solid var(--brand);
-  }
 }
 
 .todos {
@@ -124,30 +102,124 @@ button.sign-out {
   border-radius: 0.7rem;
   border: 1px solid var(--border);
   color: var(--text);
+}
 
-  & .todo-icon {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    padding: 0.5rem;
+.todo .text {
+  margin-left: 0.5rem;
 
-    border-radius: 9999px;
-    background-color: var(--border);
-    opacity: 0.2;
-    cursor: grab;
+  font-size: 1rem;
+}
 
-    transition: opacity 0.1s ease-in-out;
+.todo-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  padding: 0.5rem;
+
+  border-radius: 9999px;
+  background-color: var(--border);
+  opacity: 0.2;
+  cursor: grab;
+
+  transition: opacity 0.1s ease-in-out;
+}
+
+.auth-container {
+  width: 20rem;
+
+  position: relative;
+  margin: 8rem auto 0 auto;
+}
+
+.auth-container form {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-title {
+  padding-left: 0.5rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.auth-container form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 0.5rem;
+  outline: none;
+  border: 1px solid var(--border);
+  background-color: var(--foreground);
+  color: var(--text);
+  font-size: 0.8rem;
+
+  &::placeholder {
+    color: var(--text);
+    font-size: 0.8rem;
   }
+}
 
-  & .text {
-    margin-left: 0.5rem;
+.auth-footer {
+  width: 100%;
 
-    font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.auth-footer p {
+  font-size: 0.8rem;
+  color: var(--text);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-button {
+  width: fit-content;
+  height: fit-content;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+
+  border: none;
+  border-radius: 9999px;
+  outline: none;
+
+  background-color: var(--text);
+  color: var(--background);
+  font-size: 0.8rem;
+
+  &:hover,
+  &:focus {
+    opacity: 0.8;
   }
+}
 
-  &:hover .todo-icon {
-    opacity: 1;
-  }
+.auth-container .error-message {
+  width: 100%;
+
+  display: none;
+  position: relative;
+  margin-top: 15rem;
+  padding: 1rem;
+
+  background-color: var(--error);
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 0.8rem;
+}
+
+.error-icon {
+  position: absolute;
+  left: 1rem;
+  top: 0.5rem;
+  font-size: 1.5rem;
 }
 
 .add-todo {
@@ -175,6 +247,8 @@ button.sign-out {
   font-size: 0.8rem;
   color: var(--text);
 
+  transition: border 0.1s ease-in-out;
+
   &::placeholder {
     color: var(--text);
     font-size: 0.8rem;
@@ -188,7 +262,7 @@ button.sign-out {
   margin: 0 auto;
 
   color: var(--text);
-  font-size: 3rem;
+  font-size: 1.5rem;
 
   animation: rotate 1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
 }
@@ -221,19 +295,22 @@ button.sign-out {
 }
 
 @media (min-width: 640px) {
-  .container {
+  .container,
+  .header-wrapper {
     width: 640px;
   }
 }
 
 @media (min-width: 768px) {
-  .container {
+  .container,
+  .header-wrapper {
     width: 768px;
   }
 }
 
 @media (min-width: 1024px) {
-  .container {
+  .container,
+  .header-wrapper {
     width: 1024px;
   }
 }
@@ -245,11 +322,5 @@ button.sign-out {
     --text: #fafafa;
     --border: #2a2a2a;
     --brand: #0284c7;
-  }
-}
-
-@keyframes rotate {
-  100% {
-    transform: rotate(360deg);
   }
 }
