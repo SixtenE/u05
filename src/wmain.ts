@@ -3,7 +3,7 @@ import Sortable from 'sortablejs'
 import { nanoid } from 'nanoid'
 import type { User } from '@supabase/supabase-js'
 import { animate } from 'motion'
-import { supabase } from './lib/initSupabase'
+import { supabase } from './lib/supabase'
 import { getRelativeTimeString } from './lib/relativeTime'
 
 interface Todo {

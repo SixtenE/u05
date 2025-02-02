@@ -8,9 +8,6 @@ dependencies:
   '@supabase/supabase-js':
     specifier: ^2.48.0
     version: 2.48.0
-  lucide-static:
-    specifier: ^0.473.0
-    version: 0.473.0
   motion:
     specifier: ^12.0.1
     version: 12.0.1
@@ -754,10 +751,6 @@ packages:
     dependencies:
       p-locate: 4.1.0
     dev: true
-
-  /lucide-static@0.473.0:
-    resolution: {integrity: sha512-fHDRD9De8oyAVXkcmHTtC4ENT6jGxcyey7y/wBLkKlLvU/+zhR2VnAcwA2Hvsa9TJIEizc06jdC7PWoboc6Mkg==}
-    dev: false
 
   /make-dir@3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
