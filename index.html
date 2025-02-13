@@ -34,78 +34,53 @@
           <a href="/u05/" class="header-logo">Todos</a>
           <button class="sign-out-button">
             Sign out
-            <div class="icon-log-out"></div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-log-out"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" x2="9" y1="12" y2="12" />
+            </svg>
           </button>
         </div>
       </header>
 
-      <div class="auth-container">
-        <form class="sign-in-form">
-          <p class="form-title">Sign in</p>
-          <input
-            class="auth-email"
-            type="email"
-            name="email"
-            placeholder="Email"
-            autocomplete="off"
-            autofocus
-            required
-            value="sixten@chas.at"
-          />
-          <input
-            class="auth-password"
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            value="nndqzzts"
-          />
-          <div class="auth-footer">
-            <p>Don't have an account? Sign up</p>
-            <button class="auth-button">Sign in</button>
-          </div>
-        </form>
-        <form class="sign-up-form">
-          <p class="form-title">Sign up</p>
-          <input
-            class="auth-email"
-            type="email"
-            name="email"
-            placeholder="Email"
-            autocomplete="off"
-            autofocus
-            required
-          />
-          <input
-            class="auth-password"
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
-          <input
-            class="auth-confirm-password"
-            type="password"
-            name="confirm-password"
-            placeholder="Confirm password"
-            required
-          />
-          <div class="auth-footer">
-            <p>Already have an account? Sign in</p>
-            <button class="auth-button">Sign up</button>
-          </div>
-        </form>
-        <p class="error-message"></p>
+      <button class="delete-all-button">Delete all</button>
+      <ul class="todos">
+        <p class="loading">Laddar...</p>
+      </ul>
+
+      <div class="add-todo">
+        <div class="add-todo-wrapper">
+          <textarea name="text" placeholder="What needs to be done?"></textarea>
+          <button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-corner-down-left"
+            >
+              <polyline points="9 10 4 15 9 20" />
+              <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+            </svg>
+          </button>
+        </div>
       </div>
-
-      <ul class="todos"></ul>
-
-      <!-- <div class="add-todo">
-        <textarea name="text" placeholder="What needs to be done?"></textarea>
-        <button>
-          <div class="icon-corner-down-left"></div>
-        </button>
-      </div> -->
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
