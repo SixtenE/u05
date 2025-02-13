@@ -1,36 +1,41 @@
 import { signIn } from './lib/supabase'
 
-//queryselectors
-const emailInput = document.querySelector('.auth-email') as HTMLInputElement
-const passwordInput = document.querySelector(
-  '.auth-password',
-) as HTMLInputElement
+const signInForm = document.querySelector('form') as HTMLFormElement
+const errorMessage = document.querySelector(
+  '.error-message',
+) as HTMLParagraphElement
 
-document.querySelector('form')?.addEventListener('submit', async (e) => {
+signInForm.addEventListener('submit', async (e) => {
   e.preventDefault()
 
-  const email = emailInput.value
-  const password = passwordInput.value
+  const form = e.target as HTMLFormElement
 
-  if (!email || email.trim() === '' || !password || password.trim() === '') {
-    console.error('Email and password are required')
+  const formData = new FormData(form)
+
+  const email = formData.get('email')
+  const password = formData.get('password')
+
+  if (!email || typeof email !== 'string' || email.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Email is required'
     return
   }
 
-  const { user, error } = await signIn({
-    email,
-    password,
-  })
-
-  if (error) {
-    console.error(error)
+  if (!password || typeof password !== 'string' || password.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Password is required'
     return
   }
 
-  if (!user) {
-    console.error('No user found')
+  const { user, error } = await signIn({ email, password })
+
+  if (error || !user) {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Error signing in'
     return
   }
+
+  form.reset()
 
   window.location.href = '/u05/'
 })

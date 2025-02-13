@@ -80,7 +80,8 @@ export async function readTodos(): Promise<{
   const { data, error } = await supabase
     .from('todos')
     .select('*')
-    .returns<Todo[]>()
+    .order('created_at', { ascending: false })
+    .returns<Todo[] | []>()
   return { data, error }
 }
 
@@ -106,10 +107,10 @@ export async function deleteTodo({ id }: { id: Todo['id'] }): Promise<{
   return { error }
 }
 
-export async function deleteAllTodos(): Promise<{
+export async function deleteAllTodos({ userId }: { userId: string }): Promise<{
   error: PostgrestError | null
 }> {
-  const { error } = await supabase.from('todos').delete()
+  const { error } = await supabase.from('todos').delete().eq('user_id', userId)
 
   return { error }
 }
