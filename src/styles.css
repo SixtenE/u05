@@ -179,6 +179,10 @@ body {
   gap: 0.5rem;
 }
 
+.sign-up-form {
+  display: none;
+}
+
 .form-title {
   padding-left: 0.5rem;
   font-size: 1rem;
@@ -216,6 +220,30 @@ body {
   color: var(--text);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.auth-toggle-button {
+  width: fit-content;
+  height: fit-content;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0;
+
+  border: none;
+  border-radius: 9999px;
+  outline: none;
+
+  background-color: var(--background);
+  color: var(--text);
+  font-size: 0.8rem;
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    opacity: 0.8;
+  }
 }
 
 .auth-button {
@@ -262,7 +290,7 @@ body {
   padding: 0 1rem;
   bottom: 5rem;
   left: 0;
-  display: flex;
+  display: none;
   justify-content: center;
 }
 
@@ -298,7 +326,7 @@ body {
   }
 }
 
-.add-todo-wrapper button {
+.add-todo-button {
   width: fit-content;
   height: fit-content;
 

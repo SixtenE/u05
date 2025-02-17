@@ -77,9 +77,18 @@ export async function readTodos(): Promise<{
   data: Todo[] | null
   error: PostgrestError | null
 }> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { data: null, error: null }
+  }
+
   const { data, error } = await supabase
     .from('todos')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .returns<Todo[] | []>()
   return { data, error }

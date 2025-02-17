@@ -5,7 +5,9 @@ import {
   deleteTodo,
   getUser,
   readTodos,
+  signIn,
   signOut,
+  signUp,
   Todo,
   updateTodo,
 } from './lib/supabase'
@@ -19,15 +21,57 @@ const signOutButton = document.querySelector(
 const textArea = document.querySelector(
   '.add-todo-wrapper textarea',
 ) as HTMLTextAreaElement
+const addTodoContainer = document.querySelector('.add-todo') as HTMLDivElement
 const addTodoButton = document.querySelector(
-  '.add-todo-wrapper button',
+  '.add-todo-button',
 ) as HTMLButtonElement
 const deleteAllButton = document.querySelector(
   '.delete-all-button',
 ) as HTMLButtonElement
 
+const toggleAuthButton = document.querySelectorAll(
+  '.auth-toggle-button',
+) as NodeListOf<HTMLButtonElement>
+const signInForm = document.querySelector('.sign-in-form') as HTMLFormElement
+const signUpForm = document.querySelector('.sign-up-form') as HTMLFormElement
+const errorMessage = document.querySelector(
+  '.error-message',
+) as HTMLParagraphElement
+
 let user: User | null = null
 let editingTodo: Todo | null = null
+let authState: 'sign-in' | 'sign-up' = 'sign-in'
+
+function showLogInPage() {
+  signInForm.style.display = 'flex'
+  signUpForm.style.display = 'none'
+
+  todosList.innerHTML = ''
+  todosList.style.display = 'none'
+  addTodoContainer.style.display = 'none'
+  signOutButton.style.display = 'none'
+}
+
+function showTodoList() {
+  errorMessage.style.display = 'none'
+  signInForm.style.display = 'none'
+  signUpForm.style.display = 'none'
+
+  todosList.style.display = 'flex'
+  addTodoContainer.style.display = 'flex'
+  signOutButton.style.display = 'flex'
+
+  fetchTodos()
+}
+
+function showSignUpPage() {
+  signInForm.style.display = 'none'
+  signUpForm.style.display = 'flex'
+
+  todosList.style.display = 'none'
+  addTodoContainer.style.display = 'none'
+  signOutButton.style.display = 'none'
+}
 
 function addTodoToDom(todo: Todo) {
   const todoItem = document.createElement('li')
@@ -107,12 +151,13 @@ async function checkUser() {
   const { data, error } = await getUser()
 
   if (error || !data.user) {
-    window.location.href = '/u05/sign-in'
+    showLogInPage()
+    return
   }
 
   user = data.user
 
-  fetchTodos()
+  showTodoList()
 }
 
 async function addTodo() {
@@ -187,7 +232,7 @@ signOutButton.addEventListener('click', async () => {
     console.error(error)
     return
   }
-  window.location.href = '/u05/sign-in'
+  showLogInPage()
 })
 
 addTodoButton.addEventListener('click', () => {
@@ -226,5 +271,101 @@ textArea.addEventListener('blur', () => {
     editingTodo = null
   }
 })
+
+toggleAuthButton.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (authState === 'sign-in') {
+      authState = 'sign-up'
+      showSignUpPage()
+    } else {
+      authState = 'sign-in'
+      showLogInPage()
+    }
+  })
+})
+
+signInForm.addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  const form = e.target as HTMLFormElement
+
+  const formData = new FormData(form)
+
+  const email = formData.get('email')
+  const password = formData.get('password')
+
+  if (!email || typeof email !== 'string' || email.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Email is required'
+    return
+  }
+
+  if (!password || typeof password !== 'string' || password.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Password is required'
+    return
+  }
+
+  const { user, error } = await signIn({ email, password })
+
+  if (error || !user) {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Error signing in'
+    return
+  }
+
+  form.reset()
+
+  showTodoList()
+})
+
+signUpForm.addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  const form = e.target as HTMLFormElement
+
+  const formData = new FormData(form)
+
+  const email = formData.get('email')
+  const password = formData.get('password')
+  const confirmPassword = formData.get('confirm-password')
+
+  if (!email || typeof email !== 'string' || email.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Email is required'
+    return
+  }
+
+  if (!password || typeof password !== 'string' || password.trim() === '') {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Password is required'
+    return
+  }
+
+  if (
+    !confirmPassword ||
+    typeof confirmPassword !== 'string' ||
+    confirmPassword.trim() === '' ||
+    confirmPassword !== password
+  ) {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'Passwords do not match'
+    return
+  }
+
+  const { user, error } = await signUp({ email, password })
+
+  if (error || !user) {
+    errorMessage.style.display = 'block'
+    errorMessage.textContent = 'An error occurred. Please try again.'
+    return
+  }
+
+  form.reset()
+
+  showTodoList()
+})
+
+showLogInPage()
 
 checkUser()

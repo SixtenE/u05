@@ -1,6 +1,6 @@
 import { signIn } from './lib/supabase'
 
-const signInForm = document.querySelector('form') as HTMLFormElement
+const signInForm = document.querySelector('.sign-in-form') as HTMLFormElement
 const errorMessage = document.querySelector(
   '.error-message',
 ) as HTMLParagraphElement
@@ -37,5 +37,5 @@ signInForm.addEventListener('submit', async (e) => {
 
   form.reset()
 
-  window.location.href = '/u05/'
+  //SHOW TODO LIST
 })
